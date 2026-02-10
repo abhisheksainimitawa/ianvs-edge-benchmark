@@ -1,6 +1,6 @@
 # 🚀 Ianvs Edge AI Benchmarking Platform
 
-[![CI/CD Pipeline](https://github.com/yourusername/ianvs-benchmark/actions/workflows/ci.yaml/badge.svg)](https://github.com/yourusername/ianvs-benchmark/actions)
+[![CI/CD Pipeline](https://github.com/abhisheksainimitawa/ianvs-edge-benchmark/actions/workflows/ci.yaml/badge.svg)](https://github.com/abhisheksainimitawa/ianvs-edge-benchmark/actions)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![KubeEdge](https://img.shields.io/badge/KubeEdge-Compatible-green.svg)](https://kubeedge.io)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.25+-blue.svg)](https://kubernetes.io)
@@ -129,8 +129,8 @@ This project implements a **cloud-edge collaborative AI benchmarking framework**
 ### Development Tools
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/ianvs-benchmark.git
-cd ianvs-benchmark/repo
+git clone https://github.com/abhisheksainimitawa/ianvs-edge-benchmark.git
+cd ianvs-edge-benchmark/repo
 
 # Install Python dependencies (local testing)
 pip install -r runner/requirements.txt
@@ -169,7 +169,7 @@ kubectl port-forward -n ianvs-benchmark svc/ianvs-dashboard 8501:8501
 # (Refer to cloud provider docs)
 
 # Build and push images to registry
-export IMAGE_REGISTRY=ghcr.io/yourusername
+export IMAGE_REGISTRY=ghcr.io/abhisheksainimitawa
 make build-all
 make push-all
 
@@ -307,7 +307,7 @@ eval $(minikube docker-env)
 make build-all
 
 # Remote registry (GitHub Container Registry)
-export IMAGE_REGISTRY=ghcr.io/yourusername
+export IMAGE_REGISTRY=ghcr.io/abhisheksainimitawa
 docker login ghcr.io
 make build-all
 make push-all
@@ -531,8 +531,8 @@ This project is licensed under the **Apache License 2.0** - see [LICENSE](LICENS
 
 ## 📞 Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ianvs-benchmark/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/ianvs-benchmark/discussions)
+- **Issues**: [GitHub Issues](https://github.com/abhisheksainimitawa/ianvs-edge-benchmark/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/abhisheksainimitawa/ianvs-edge-benchmark/discussions)
 - **Ianvs Slack**: [Join #ianvs channel](https://kubeedge.io/community/)
 
 ---
