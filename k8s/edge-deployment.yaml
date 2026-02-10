@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ianvs-edge-worker
+  namespace: ianvs-benchmark
+  labels:
+    app: ianvs
+    component: edge-worker
+spec:
+  selector:
+    matchLabels:
+      app: ianvs
+      component: edge-worker
+  template:
+    metadata:
+      labels:
+        app: ianvs
+        component: edge-worker
+    spec:
+      containers:
+      - name: edge-worker
+        image: ianvs-runner:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python3", "-c", "import time; print('Edge worker running...'); time.sleep(3600)"]
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+        - name: edge-data
+          mountPath: /data
+        env:
+        - name: NODE_TYPE
+          value: "edge"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: IANVS_WORKSPACE
+          value: "/app/workspace"
+      
+      volumes:
+      - name: config-volume
+        configMap:
+          name: ianvs-configs
+      - name: edge-data
+        emptyDir: {}
+      
+      nodeSelector:
+        node-role.kubernetes.io/edge: ""
+      
+      tolerations:
+      - key: node-role.kubernetes.io/edge
+        operator: Exists
+        effect: NoSchedule

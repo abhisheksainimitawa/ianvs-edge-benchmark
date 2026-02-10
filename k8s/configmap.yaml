@@ -1,0 +1,128 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ianvs-configs
+  namespace: ianvs-benchmark
+data:
+  algorithm.yaml: |
+    algorithm:
+      paradigm_type: "federatedlearning"
+      fl_data_setting:
+        train_ratio: 0.8
+        splitting_method: "default"
+      initial_model_url: "./initial_model/model.pkl"
+      modules:
+        - type: "basemodel"
+          name: "FederatedLearningModel"
+          url: "./examples/federated_learning/model.py"
+          hyperparameters:
+            learning_rate: 0.001
+            batch_size: 32
+            epochs: 5
+            optimizer: "adam"
+        - type: "aggregation"
+          name: "FedAvg"
+          url: "./examples/federated_learning/aggregation.py"
+          hyperparameters:
+            aggregation_algorithm: "fedavg"
+            weighted: true
+        - type: "train"
+          name: "train"
+          url: "./examples/federated_learning/training.py"
+          hyperparameters:
+            client_number: 3
+            rounds: 10
+            local_epochs: 2
+        - type: "evaluation"
+          name: "eval"
+          url: "./examples/federated_learning/evaluation.py"
+          hyperparameters:
+            metrics:
+              - "accuracy"
+              - "f1_score"
+              - "precision"
+              - "recall"
+  
+  testenv.yaml: |
+    testenv:
+      name: "edge_ai_benchmark"
+      dataset:
+        name: "MNIST"
+        url: "./datasets/mnist"
+        train_url: "./datasets/mnist/train"
+        test_url: "./datasets/mnist/test"
+        format: "pkl"
+      metrics:
+        - name: "accuracy"
+          url: "./examples/metrics/accuracy.py"
+        - name: "precision"
+          url: "./examples/metrics/precision.py"
+        - name: "recall"
+          url: "./examples/metrics/recall.py"
+        - name: "f1_score"
+          url: "./examples/metrics/f1.py"
+        - name: "inference_latency"
+          url: "./examples/metrics/latency.py"
+        - name: "bandwidth_usage"
+          url: "./examples/metrics/bandwidth.py"
+      edge_nodes:
+        - name: "edge-node-1"
+          location: "edge"
+          resources:
+            cpu: "2"
+            memory: "4Gi"
+        - name: "edge-node-2"
+          location: "edge"
+          resources:
+            cpu: "2"
+            memory: "4Gi"
+        - name: "edge-node-3"
+          location: "edge"
+          resources:
+            cpu: "2"
+            memory: "4Gi"
+      cloud_node:
+        name: "cloud-master"
+        location: "cloud"
+        resources:
+          cpu: "4"
+          memory: "8Gi"
+  
+  benchmarkingjob.yaml: |
+    benchmarkingjob:
+      name: "federated_learning_edge_benchmark"
+      workspace: "./runner/workspace"
+      testenv: "./runner/configs/testenv.yaml"
+      algorithms:
+        - name: "FederatedAveraging"
+          algorithm: "./runner/configs/algorithm.yaml"
+      rank:
+        sort_by:
+          - name: "accuracy"
+            weight: 0.4
+            order: "desc"
+          - name: "f1_score"
+            weight: 0.3
+            order: "desc"
+          - name: "inference_latency"
+            weight: 0.2
+            order: "asc"
+          - name: "bandwidth_usage"
+            weight: 0.1
+            order: "asc"
+        visualization:
+          mode: "all"
+          method:
+            - "radar_chart"
+            - "line_chart"
+            - "bar_chart"
+      execution:
+        mode: "distributed"
+        parallelism: 3
+        retry_limit: 2
+        timeout: 3600
+      output:
+        format: "json"
+        save_path: "./runner/workspace/results"
+        include_raw_data: true
+        generate_report: true

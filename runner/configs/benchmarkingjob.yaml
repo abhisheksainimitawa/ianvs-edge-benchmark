@@ -1,0 +1,49 @@
+benchmarkingjob:
+  # Ianvs Benchmarking Job Configuration
+  name: "federated_learning_edge_benchmark"
+  workspace: "./runner/workspace"
+  
+  # Reference to test environment
+  testenv: "./runner/configs/testenv.yaml"
+  
+  # Algorithms to benchmark
+  algorithms:
+    - name: "FederatedAveraging"
+      algorithm: "./runner/configs/algorithm.yaml"
+  
+  # Ranking criteria for algorithms
+  rank:
+    sort_by:
+      - name: "accuracy"
+        weight: 0.4
+        order: "desc"
+      - name: "f1_score"
+        weight: 0.3
+        order: "desc"
+      - name: "inference_latency"
+        weight: 0.2
+        order: "asc"
+      - name: "bandwidth_usage"
+        weight: 0.1
+        order: "asc"
+    
+    visualization:
+      mode: "all"
+      method:
+        - "radar_chart"
+        - "line_chart"
+        - "bar_chart"
+  
+  # Job execution settings
+  execution:
+    mode: "distributed"  # Cloud-edge distributed execution
+    parallelism: 3  # Run on 3 edge nodes in parallel
+    retry_limit: 2
+    timeout: 3600  # 1 hour timeout
+  
+  # Output configuration
+  output:
+    format: "json"
+    save_path: "./runner/workspace/results"
+    include_raw_data: true
+    generate_report: true

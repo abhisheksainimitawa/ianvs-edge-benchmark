@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ianvs-cloud-master
+  namespace: ianvs-benchmark
+  labels:
+    app: ianvs
+    component: cloud-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ianvs
+      component: cloud-master
+  template:
+    metadata:
+      labels:
+        app: ianvs
+        component: cloud-master
+    spec:
+      containers:
+      - name: benchmark-runner
+        image: ianvs-runner:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python3", "/app/doctor.py"]
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+        - name: workspace-volume
+          mountPath: /app/workspace
+        env:
+        - name: NODE_TYPE
+          value: "cloud"
+        - name: IANVS_WORKSPACE
+          value: "/app/workspace"
+      
+      - name: dashboard
+        image: ianvs-dashboard:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8501
+          name: http
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /app/runner/workspace
+          readOnly: true
+        - name: config-volume
+          mountPath: /app/runner/configs
+          readOnly: true
+      
+      volumes:
+      - name: config-volume
+        configMap:
+          name: ianvs-configs
+      - name: workspace-volume
+        persistentVolumeClaim:
+          claimName: ianvs-workspace-pvc
+      
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+      
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule

@@ -1,0 +1,44 @@
+algorithm:
+  # Federated Learning Algorithm Configuration for Ianvs
+  paradigm_type: "federatedlearning"
+  fl_data_setting:
+    # Edge-cloud collaborative learning
+    train_ratio: 0.8
+    splitting_method: "default"
+  
+  initial_model_url: "./initial_model/model.pkl"
+  
+  modules:
+    - type: "basemodel"
+      name: "FederatedLearningModel"
+      url: "./examples/federated_learning/model.py"
+      hyperparameters:
+        learning_rate: 0.001
+        batch_size: 32
+        epochs: 5
+        optimizer: "adam"
+    
+    - type: "aggregation"
+      name: "FedAvg"
+      url: "./examples/federated_learning/aggregation.py"
+      hyperparameters:
+        aggregation_algorithm: "fedavg"
+        weighted: true
+    
+    - type: "train"
+      name: "train"
+      url: "./examples/federated_learning/training.py"
+      hyperparameters:
+        client_number: 3  # Simulating 3 edge nodes
+        rounds: 10
+        local_epochs: 2
+    
+    - type: "evaluation"
+      name: "eval"
+      url: "./examples/federated_learning/evaluation.py"
+      hyperparameters:
+        metrics:
+          - "accuracy"
+          - "f1_score"
+          - "precision"
+          - "recall"

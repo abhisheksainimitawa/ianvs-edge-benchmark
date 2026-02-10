@@ -1,0 +1,61 @@
+# Multi-stage build for Ianvs Runner
+FROM python:3.10-slim as builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Final stage
+FROM python:3.10-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install kubectl for K8s interaction
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+    rm kubectl
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Create app directory
+WORKDIR /app
+
+# Copy application code
+COPY doctor.py .
+COPY configs/ ./configs/
+
+# Create necessary directories
+RUN mkdir -p /app/workspace /app/workspace/results /app/examples
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    IANVS_WORKSPACE=/app/workspace \
+    PYTHONPATH=/app
+
+# Set proper permissions
+RUN chmod +x doctor.py
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import sys; sys.exit(0)"
+
+# Default command
+CMD ["python3", "doctor.py"]

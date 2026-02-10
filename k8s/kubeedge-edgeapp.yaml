@@ -1,0 +1,88 @@
+apiVersion: apps.kubeedge.io/v1alpha1
+kind: EdgeApplication
+metadata:
+  name: ianvs-edge-inference
+  namespace: ianvs-benchmark
+  labels:
+    app: ianvs
+    component: edge-inference
+spec:
+  workloadTemplate:
+    manifests:
+      - apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: edge-inference-worker
+          labels:
+            app: ianvs-edge
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: ianvs-edge
+          template:
+            metadata:
+              labels:
+                app: ianvs-edge
+            spec:
+              containers:
+              - name: inference-worker
+                image: ianvs-runner:latest
+                imagePullPolicy: IfNotPresent
+                command: 
+                  - python3
+                  - -c
+                  - |
+                    import time
+                    import json
+                    import random
+                    from datetime import datetime
+                    
+                    print("Edge inference worker started...")
+                    
+                    while True:
+                        # Simulate edge inference
+                        result = {
+                            "timestamp": datetime.now().isoformat(),
+                            "node": "edge-inference",
+                            "accuracy": round(random.uniform(0.88, 0.95), 4),
+                            "latency_ms": round(random.uniform(30, 60), 2),
+                            "samples_processed": random.randint(50, 150)
+                        }
+                        print(f"Inference result: {json.dumps(result)}")
+                        time.sleep(30)
+                resources:
+                  requests:
+                    memory: "512Mi"
+                    cpu: "250m"
+                  limits:
+                    memory: "1Gi"
+                    cpu: "500m"
+                volumeMounts:
+                - name: model-cache
+                  mountPath: /models
+                - name: inference-data
+                  mountPath: /data
+                env:
+                - name: EDGE_INFERENCE_MODE
+                  value: "true"
+                - name: MODEL_PATH
+                  value: "/models/federated_model.pkl"
+              volumes:
+              - name: model-cache
+                emptyDir: {}
+              - name: inference-data
+                emptyDir: {}
+  
+  workloadScope:
+    targetNodeGroups:
+      - name: edge-group
+        nodeSelector:
+          matchLabels:
+            node-role.kubernetes.io/edge: ""
+        overriders:
+          envOverrides:
+            - containerName: inference-worker
+              envs:
+                - name: EDGE_GROUP
+                  value: "edge-group"

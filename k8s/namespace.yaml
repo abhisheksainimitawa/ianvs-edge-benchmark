@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ianvs-benchmark
+  labels:
+    name: ianvs-benchmark
+    app: edge-ai-benchmark

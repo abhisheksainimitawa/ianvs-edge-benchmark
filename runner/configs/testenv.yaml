@@ -1,0 +1,51 @@
+testenv:
+  # Test Environment Configuration for Edge-Cloud Benchmarking
+  name: "edge_ai_benchmark"
+  
+  # Dataset configuration
+  dataset:
+    name: "MNIST"
+    url: "./datasets/mnist"
+    train_url: "./datasets/mnist/train"
+    test_url: "./datasets/mnist/test"
+    format: "pkl"
+    
+  # Metrics to track
+  metrics:
+    - name: "accuracy"
+      url: "./examples/metrics/accuracy.py"
+    - name: "precision"
+      url: "./examples/metrics/precision.py"
+    - name: "recall"
+      url: "./examples/metrics/recall.py"
+    - name: "f1_score"
+      url: "./examples/metrics/f1.py"
+    - name: "inference_latency"
+      url: "./examples/metrics/latency.py"
+    - name: "bandwidth_usage"
+      url: "./examples/metrics/bandwidth.py"
+  
+  # Edge-Cloud topology
+  edge_nodes:
+    - name: "edge-node-1"
+      location: "edge"
+      resources:
+        cpu: "2"
+        memory: "4Gi"
+    - name: "edge-node-2"
+      location: "edge"
+      resources:
+        cpu: "2"
+        memory: "4Gi"
+    - name: "edge-node-3"
+      location: "edge"
+      resources:
+        cpu: "2"
+        memory: "4Gi"
+  
+  cloud_node:
+    name: "cloud-master"
+    location: "cloud"
+    resources:
+      cpu: "4"
+      memory: "8Gi"

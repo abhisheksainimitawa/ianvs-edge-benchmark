@@ -1,0 +1,69 @@
+apiVersion: devices.kubeedge.io/v1alpha2
+kind: DeviceModel
+metadata:
+  name: edge-sensor-model
+  namespace: ianvs-benchmark
+spec:
+  properties:
+    - name: temperature
+      description: Temperature sensor reading
+      type:
+        string:
+          defaultValue: "0"
+    - name: cpu_usage
+      description: Edge device CPU usage
+      type:
+        string:
+          defaultValue: "0"
+    - name: memory_usage
+      description: Edge device memory usage
+      type:
+        string:
+          defaultValue: "0"
+    - name: inference_count
+      description: Number of inferences performed
+      type:
+        int:
+          defaultValue: 0
+---
+apiVersion: devices.kubeedge.io/v1alpha2
+kind: Device
+metadata:
+  name: edge-device-1
+  namespace: ianvs-benchmark
+  labels:
+    description: 'Edge Device for AI Inference'
+    manufacturer: 'Generic'
+    model: 'edge-sensor-model'
+spec:
+  deviceModelRef:
+    name: edge-sensor-model
+  nodeSelector:
+    nodeSelectorTerms:
+      - matchExpressions:
+          - key: node-role.kubernetes.io/edge
+            operator: Exists
+  protocol:
+    customizedProtocol:
+      protocolName: 'customized-protocol'
+  propertyVisitors:
+    - propertyName: 'temperature'
+      customizedProtocol:
+        protocolName: 'customized-protocol'
+        configData:
+          dataType: 'int'
+    - propertyName: 'cpu_usage'
+      customizedProtocol:
+        protocolName: 'customized-protocol'
+        configData:
+          dataType: 'int'
+    - propertyName: 'memory_usage'
+      customizedProtocol:
+        protocolName: 'customized-protocol'
+        configData:
+          dataType: 'int'
+    - propertyName: 'inference_count'
+      customizedProtocol:
+        protocolName: 'customized-protocol'
+        configData:
+          dataType: 'int'

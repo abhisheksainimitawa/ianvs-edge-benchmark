@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Dashboard service
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: docker/Dockerfile.dashboard
+    image: ianvs-dashboard:latest
+    container_name: ianvs-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./runner/workspace:/app/runner/workspace:ro
+      - ./runner/configs:/app/runner/configs:ro
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - ianvs-network
+
+  # Runner service (cloud master)
+  runner:
+    build:
+      context: ./runner
+      dockerfile: docker/Dockerfile.runner
+    image: ianvs-runner:latest
+    container_name: ianvs-runner
+    volumes:
+      - ./runner/workspace:/app/workspace
+      - ./runner/configs:/app/configs
+    environment:
+      - NODE_TYPE=cloud
+      - IANVS_WORKSPACE=/app/workspace
+    restart: unless-stopped
+    networks:
+      - ianvs-network
+    command: python3 doctor.py
+
+networks:
+  ianvs-network:
+    driver: bridge
+
+volumes:
+  workspace:
